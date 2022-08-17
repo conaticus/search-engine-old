@@ -38,13 +38,15 @@ const search = async (query: string): Promise<any[]> => {
                                 score = 5;
                                 break;
                         }
+
                         matchScore += score + occurances;
                     }
                 });
             });
 
         if (matchScore > 2) {
-            matches.push({ meta, score: matchScore });
+            if (matchScore > 20) matchScore = 20;
+            matches.push({ meta, score: `${matchScore * 5}/100` });
         }
     });
 
