@@ -29,13 +29,13 @@ const search = async (query: string): Promise<any[]> => {
                         let score: number = 0;
                         switch (priority) {
                             case KeywordPriority.LOW:
-                                score = 1;
+                                score = 5;
                                 break;
                             case KeywordPriority.MEDIUM:
-                                score = 3;
+                                score = 15;
                                 break;
                             case KeywordPriority.HIGH:
-                                score = 5;
+                                score = 25;
                                 break;
                         }
 
@@ -45,8 +45,8 @@ const search = async (query: string): Promise<any[]> => {
             });
 
         if (matchScore > 2) {
-            if (matchScore > 20) matchScore = 20;
-            matches.push({ meta, score: `${matchScore * 5}/100` });
+            if (matchScore > 100) matchScore = 100;
+            matches.push({ meta, score: `${matchScore}/100` });
         }
     });
 
