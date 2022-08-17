@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Search Engine</title>
+    </head>
+    <body>
+        <style>
+            .input {
+                width: 50vw;
+                height: 3vh;
+                border-radius: 10px;
+                border: solid 1px black;
+                padding: 10px;
+                outline: none;
+                font-size: 18px;
+                position: absolute;
+                top: 40%;
+                right: 50%;
+                transform: translate(50%, -50%);
+            }
+
+            h1 {
+                margin: 0;
+            }
+
+            h2 {
+                margin: 0;
+            }
+
+            h3 {
+                margin: 0;
+                font-weight: 300;
+            }
+
+            p {
+                margin: 0;
+            }
+        </style>
+
+        <form id="search-form">
+            <input id="input" class="input" type="text" placeholder="Search for anything.." />
+        </form>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+        <script>
+            const searchForm = document.getElementById("search-form");
+            const searchInput = document.getElementById("input");
+
+            searchForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const { data: results } = await axios.post("/api/search", { query: searchInput.value });
+                searchForm.style.display = "none";
+
+                if (results.length === 0) {
+                    const error = document.createElement("p");
+                    error.innerText = "Well.. this is awkward. There were no results for this query.";
+
+                    document.body.appendChild(error);
+                    return;
+                }
+
+                const resultsDiv = document.createElement("div");
+
+                results.forEach((result) => {
+                    const container = document.createElement("div");
+                    const titleContainer = document.createElement("a");
+                    const title = document.createElement("h1");
+                    const description = document.createElement("h3");
+                    const score = document.createElement("p");
+
+                    title.innerText = result.meta.title;
+                    description.innerText = result.meta.description;
+                    score.innerText = result.score;
+
+                    titleContainer.appendChild(title);
+                    titleContainer.href = "/"; // placeholder
+
+                    container.appendChild(titleContainer);
+                    container.appendChild(description);
+                    container.appendChild(score);
+
+                    document.body.appendChild(container);
+                });
+            });
+        </script>
+    </body>
+</html>
