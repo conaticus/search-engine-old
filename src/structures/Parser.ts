@@ -11,7 +11,8 @@ export default class Parser {
         return this.meta;
     }
 
-    // TODO: meta
+    // TODO: meta, traverse elements instead of getting base components
+    // TODO: ignore word endings (ed, ey, s, etc.)
     public getKeywords(): IKeyword[] {
         const keywords: IKeyword[] = [];
 
@@ -20,9 +21,11 @@ export default class Parser {
         let extractedWords: string[] = [];
 
         const body = this.document.getElementsByTagName("body")[0];
+
         body.childNodes.forEach((childNode) => {
             if (!childNode.innerText) return;
-            const words = this.extractWords(childNode.innerText);
+            let words = this.extractWords(childNode.innerText);
+
             extractedWords = [...extractedWords, ...words];
         });
 
@@ -37,16 +40,30 @@ export default class Parser {
         });
 
         for (const word in wordOccurances) {
-            const occurances = wordOccurances[word];
+            let occurances = wordOccurances[word];
             if (occurances > 1) {
-                keywords.push({ keyword: word, priority: KeywordPriority.LOW });
+                let priority: KeywordPriority = KeywordPriority.LOW;
+                if (this.meta?.title?.includes(word)) {
+                    priority = KeywordPriority.HIGH;
+                    occurances++;
+                }
+
+                if (this.meta?.description?.includes(word)) {
+                    priority = KeywordPriority.HIGH;
+                    occurances++;
+                }
+
+                keywords.push({
+                    keyword: word,
+                    priority,
+                    occurances,
+                });
             }
         }
 
         return keywords;
     }
 
-    // TODO: extract common phrases
     private extractWords(str: string): string[] {
         str = str.replace(/[.,\/#!$%^&*;:{}=-_`~()]/gm, " "); // ignore grammar (e.g "hi!" will be read as "hi")
         str = str.replace(/(\r\n|\n|\r)/gm, ""); // ignore newlines

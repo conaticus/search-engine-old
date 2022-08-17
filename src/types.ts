@@ -16,4 +16,5 @@ export interface IMeta {
 export interface IKeyword {
     priority: KeywordPriority;
     keyword: string;
+    occurances: number;
 }
