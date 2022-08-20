@@ -71,7 +71,7 @@
                     const score = document.createElement("p");
 
                     title.innerText = result.meta.title;
-                    description.innerText = result.meta.description;
+                    description.innerText = result.meta.description || "";
                     score.innerText = result.score;
 
                     titleContainer.appendChild(title);

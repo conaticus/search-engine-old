@@ -29,6 +29,8 @@ export default class Parser {
             extractedWords = [...extractedWords, ...words];
         });
 
+        extractedWords = [...extractedWords, ...this.extractWords(this.meta?.title), ...this.extractWords(this.meta?.description)];
+
         const wordOccurances: { [key: string]: number } = {};
 
         extractedWords.forEach((word) => {
@@ -43,12 +45,12 @@ export default class Parser {
             let occurances = wordOccurances[word];
             if (occurances > 1) {
                 let priority: KeywordPriority = KeywordPriority.LOW;
-                if (this.meta?.title?.includes(word)) {
+                if (this.meta?.title?.toLowerCase().includes(word)) {
                     priority = KeywordPriority.HIGH;
                     occurances++;
                 }
 
-                if (this.meta?.description?.includes(word)) {
+                if (this.meta?.description?.toLowerCase().includes(word)) {
                     priority = KeywordPriority.HIGH;
                     occurances++;
                 }
@@ -64,9 +66,10 @@ export default class Parser {
         return keywords;
     }
 
-    private extractWords(str: string): string[] {
-        str = str.replace(/[.,\/#!$%^&*;:{}=-_`~()]/gm, " "); // ignore grammar (e.g "hi!" will be read as "hi")
-        str = str.replace(/(\r\n|\n|\r)/gm, ""); // ignore newlines
+    private extractWords(str: string = ""): string[] {
+        str = str.toLowerCase().trim();
+        str = str.replace(/[.,\/'#!$%^&*;:{}=-_`~()]/gm, ""); // ignore grammar (e.g "hi!" will be read as "hi")
+        str = str.replace(/(\r\n|\n|\r|\t)/gm, ""); // ignore newlines
         return str.split(" ").filter((str) => str.length > 0);
     }
 
