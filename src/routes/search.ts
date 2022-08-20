@@ -1,5 +1,5 @@
 import { Router } from "express";
-import search from "../search";
+import search from "../util/search";
 import { ISearchBody } from "../types";
 import error from "../util/error";
 

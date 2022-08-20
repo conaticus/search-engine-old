@@ -1,5 +1,6 @@
 import { HTMLElement } from "node-html-parser";
 import { IKeyword, IMeta, KeywordPriority } from "../types";
+import { removeEnding } from "../util/strings";
 
 export default class Parser {
     meta?: IMeta;
@@ -13,7 +14,7 @@ export default class Parser {
 
     // TODO: meta, traverse elements instead of getting base components
     // TODO: ignore word endings (ed, ey, s, etc.)
-    public getKeywords(): IKeyword[] {
+    public async getKeywords(): Promise<IKeyword[]> {
         const keywords: IKeyword[] = [];
 
         if (!this.meta) this.getMeta();
@@ -33,13 +34,17 @@ export default class Parser {
 
         const wordOccurances: { [key: string]: number } = {};
 
-        extractedWords.forEach((word) => {
+        const map = extractedWords.map(async (word) => {
+            word = await removeEnding(word);
+
             if (wordOccurances[word]) {
                 wordOccurances[word]++;
             } else {
                 wordOccurances[word] = 1;
             }
         });
+
+        await Promise.all(map);
 
         for (const word in wordOccurances) {
             let occurances = wordOccurances[word];

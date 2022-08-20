@@ -18,3 +18,22 @@ export interface IKeyword {
     keyword: string;
     occurances: number;
 }
+
+export type WordAPIResponse = {
+    word: string;
+    phonetic: string;
+    phonetics: {
+        text: string;
+        audio?: string;
+    }[];
+    origin: string;
+    meanings: {
+        partOfSpeech: string;
+        definitions: {
+            definition: string;
+            example: string;
+            synonyms: string[];
+            antonyms: string[];
+        }[];
+    }[];
+}[];
