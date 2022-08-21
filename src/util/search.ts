@@ -28,8 +28,7 @@ const search = async (query: string): Promise<any[]> => {
 
         let matchScore = 0;
 
-        query
-            .split(" ")
+        words
             .filter((s) => s.length > 0)
             .forEach((word) => {
                 keywords.forEach(({ keyword, priority, occurances }) => {

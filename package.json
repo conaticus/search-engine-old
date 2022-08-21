@@ -1,6 +1,8 @@
 {
     "dependencies": {
+        "@prisma/client": "^4.2.1",
         "axios": "^0.27.2",
+        "csv-parser": "^3.0.0",
         "dotenv": "^16.0.1",
         "express": "^4.18.1",
         "node-html-parser": "^5.4.2-0"
@@ -8,6 +10,7 @@
     "devDependencies": {
         "@types/express": "^4.17.13",
         "@types/node": "^18.7.5",
+        "prisma": "^4.2.1",
         "ts-node-dev": "^2.0.0"
     },
     "name": "search-engine",
@@ -16,7 +19,8 @@
     "scripts": {
         "start": "node ./dist/index.js",
         "dev": "ts-node-dev --respawn ./src/index.ts",
-        "build": "tsc"
+        "build": "tsc",
+        "migrate-dev": "npx prisma format && npx prisma generate && npx prisma migrate dev"
     },
     "keywords": [],
     "author": "",
