@@ -13,7 +13,6 @@ export default class Parser {
     }
 
     // TODO: meta, traverse elements instead of getting base components
-    // TODO: ignore word endings (ed, ey, s, etc.)
     public async getKeywords(): Promise<IKeyword[]> {
         const keywords: IKeyword[] = [];
 
