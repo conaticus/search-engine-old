@@ -1,5 +1,6 @@
 import { HTMLElement } from "node-html-parser";
 import { IKeyword, IMeta, KeywordPriority } from "../types";
+import { WORD_EXCEPTIONS } from "../util/consts";
 import { nounify } from "../util/strings";
 
 /** Searches for keywords in a HTML document */
@@ -19,8 +20,9 @@ export default class Parser {
         if (!this.meta) this.getMeta();
 
         let extractedWords: string[] = [];
+        console.log(this.document.firstChild);
 
-        for (const node of this.document.firstChild.childNodes) {
+        for (const node of this.document.childNodes) {
             if (!node.innerText) continue;
 
             const words = this.extractWords(node.innerText);
@@ -32,6 +34,7 @@ export default class Parser {
         const wordOccurances: { [key: string]: number } = {};
 
         const map = extractedWords.map(async (word) => {
+            if (WORD_EXCEPTIONS.includes(word)) return;
             word = await nounify(word);
 
             if (wordOccurances[word]) {

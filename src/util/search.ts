@@ -1,4 +1,3 @@
-import parse from "node-html-parser/dist/parse";
 import Parser from "../structures/Parser";
 import { KeywordPriority } from "../types";
 import { getSites } from "./cache";
@@ -18,8 +17,8 @@ const search = async (query: string): Promise<any[]> => {
     const matches: any[] = [];
 
     const sites = await getSites();
-    const siteMap = sites.map(async (site) => {
-        const parser = new Parser(parse(site));
+    const siteMap = sites.map(async (document) => {
+        const parser = new Parser(document as any);
 
         const meta = parser.getMeta();
         const keywords = await parser.getKeywords();

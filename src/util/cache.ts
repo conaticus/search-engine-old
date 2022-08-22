@@ -1,5 +1,6 @@
 import axios from "axios";
 import fs from "fs/promises";
+import parse from "node-html-parser";
 import { SAMPLE_SITES } from "./consts";
 
 interface IPlurals {
@@ -9,7 +10,7 @@ interface IPlurals {
 }
 
 let plurals: IPlurals;
-let sampleSites: string[];
+let sampleSites: HTMLElement[];
 
 export const getPlurals = async (): Promise<IPlurals> => {
     if (!plurals) {
@@ -20,15 +21,15 @@ export const getPlurals = async (): Promise<IPlurals> => {
     return plurals;
 };
 
-export const getSites = async (): Promise<string[]> => {
+export const getSites = async (): Promise<HTMLElement[]> => {
     if (sampleSites) {
         return sampleSites;
     }
 
     const siteMap = SAMPLE_SITES.map(async (site) => {
         const response = await axios.get(site);
-        return response.data;
-    });
+        return parse(response.data);
+    }) as Promise<any>[];
 
     sampleSites = await Promise.all(siteMap);
     return sampleSites;
