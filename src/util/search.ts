@@ -1,28 +1,26 @@
-import fs from "fs/promises";
-import { parse } from "node-html-parser";
+import parse from "node-html-parser/dist/parse";
 import Parser from "../structures/Parser";
 import { KeywordPriority } from "../types";
-import { removeEnding } from "./strings";
+import { getSites } from "./cache";
+import { nounify } from "./strings";
 
-const SAMPLES_DIR = "./sample-sites";
-
+/**
+ * Uses commonly used words to index
+ */
 const search = async (query: string): Promise<any[]> => {
     const words = query.split(" ");
     const wordMap = words.map(async (word, idx) => {
-        words[idx] = await removeEnding(word);
+        words[idx] = await nounify(word);
     });
 
     await Promise.all(wordMap);
 
-    const files = await fs.readdir(SAMPLES_DIR);
-
     const matches: any[] = [];
 
-    const fileMap = files.map(async (filename) => {
-        const contents = await fs.readFile(`${SAMPLES_DIR}/${filename}`, "utf8");
-        const document = parse(contents);
+    const sites = await getSites();
+    const siteMap = sites.map(async (site) => {
+        const parser = new Parser(parse(site));
 
-        const parser = new Parser(document);
         const meta = parser.getMeta();
         const keywords = await parser.getKeywords();
 
@@ -57,7 +55,7 @@ const search = async (query: string): Promise<any[]> => {
         }
     });
 
-    await Promise.all(fileMap);
+    await Promise.all(siteMap);
     return matches;
 };
 

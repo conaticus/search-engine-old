@@ -1,7 +1,8 @@
 import { HTMLElement } from "node-html-parser";
 import { IKeyword, IMeta, KeywordPriority } from "../types";
-import { removeEnding } from "../util/strings";
+import { nounify } from "../util/strings";
 
+/** Searches for keywords in a HTML document */
 export default class Parser {
     meta?: IMeta;
 
@@ -12,7 +13,6 @@ export default class Parser {
         return this.meta;
     }
 
-    // TODO: meta, traverse elements instead of getting base components
     public async getKeywords(): Promise<IKeyword[]> {
         const keywords: IKeyword[] = [];
 
@@ -20,21 +20,19 @@ export default class Parser {
 
         let extractedWords: string[] = [];
 
-        const body = this.document.getElementsByTagName("body")[0];
+        for (const node of this.document.firstChild.childNodes) {
+            if (!node.innerText) continue;
 
-        body.childNodes.forEach((childNode) => {
-            if (!childNode.innerText) return;
-            let words = this.extractWords(childNode.innerText);
-
+            const words = this.extractWords(node.innerText);
             extractedWords = [...extractedWords, ...words];
-        });
+        }
 
         extractedWords = [...extractedWords, ...this.extractWords(this.meta?.title), ...this.extractWords(this.meta?.description)];
 
         const wordOccurances: { [key: string]: number } = {};
 
         const map = extractedWords.map(async (word) => {
-            word = await removeEnding(word);
+            word = await nounify(word);
 
             if (wordOccurances[word]) {
                 wordOccurances[word]++;
@@ -78,8 +76,8 @@ export default class Parser {
     }
 
     private getTitle(): string | undefined {
-        const title = this.document.getElementsByTagName("title")[0];
-        return title.innerText || undefined;
+        const title: HTMLElement = this.document.getElementsByTagName("title")[0];
+        return title?.innerText || undefined;
     }
 
     private getDescription(): string | undefined {

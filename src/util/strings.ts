@@ -1,6 +1,10 @@
 import { getPlurals } from "./cache";
 
-export const removeEnding = async (word: string): Promise<string> => {
+/**
+ * Converts to a single noun if `word` is plural \
+ * E.G: `"cities"` -> `"city"`
+ */
+export const nounify = async (word: string): Promise<string> => {
     const plurals = await getPlurals();
     const plural = plurals[word];
 

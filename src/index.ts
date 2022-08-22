@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import router from "./routes/router";
+import { getSites } from "./util/cache";
 
 require("dotenv").config();
 
@@ -12,4 +13,9 @@ server.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "/client/index.html"));
 });
 
-server.listen(process.env.PORT, () => console.log(`Listening at *:${process.env.PORT}`));
+const initialise = async () => {
+    await getSites();
+    server.listen(process.env.PORT, () => console.log(`Listening at *:${process.env.PORT}`));
+};
+
+initialise();
