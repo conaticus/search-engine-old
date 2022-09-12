@@ -9,8 +9,13 @@ interface IPlurals {
     };
 }
 
+interface ISampleSite {
+    document: HTMLElement;
+    manifest?: any;
+}
+
 let plurals: IPlurals;
-let sampleSites: HTMLElement[];
+let sampleSites: ISampleSite[];
 
 export const getPlurals = async (): Promise<IPlurals> => {
     if (!plurals) {
@@ -21,14 +26,19 @@ export const getPlurals = async (): Promise<IPlurals> => {
     return plurals;
 };
 
-export const getSites = async (): Promise<HTMLElement[]> => {
+export const getSites = async (): Promise<ISampleSite[]> => {
     if (sampleSites) {
         return sampleSites;
     }
 
     const siteMap = SAMPLE_SITES.map(async (site) => {
         const response = await axios.get(site);
-        return parse(response.data);
+        try {
+            const manifest = await axios.get(`${site}/manifest.json`);
+            return { document: parse(response.data), manifest: manifest.data };
+        } catch {
+            return { document: parse(response.data) };
+        }
     }) as Promise<any>[];
 
     sampleSites = await Promise.all(siteMap);

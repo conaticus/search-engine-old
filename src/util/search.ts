@@ -17,8 +17,8 @@ const search = async (query: string): Promise<any[]> => {
     const matches: any[] = [];
 
     const sites = await getSites();
-    const siteMap = sites.map(async (document) => {
-        const parser = new Parser(document as any);
+    const siteMap = sites.map(async ({ document, manifest }) => {
+        const parser = new Parser(document as any, manifest);
 
         const meta = parser.getMeta();
         const keywords = await parser.getKeywords();

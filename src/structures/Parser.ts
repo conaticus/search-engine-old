@@ -5,12 +5,14 @@ import { nounify } from "../util/strings";
 
 /** Searches for keywords in a HTML document */
 export default class Parser {
-    meta?: IMeta;
+    meta: IMeta = {};
 
-    constructor(public document: HTMLElement) {}
+    constructor(public document: HTMLElement, private manifest: any = {}) {}
 
     public getMeta(): IMeta {
-        this.meta = { title: this.getTitle(), description: this.getDescription() };
+        this.meta.title = this.manifest.name || this.getTitle();
+        this.meta.description = this.manifest.description || this.getDescription();
+
         return this.meta;
     }
 
@@ -20,7 +22,6 @@ export default class Parser {
         if (!this.meta) this.getMeta();
 
         let extractedWords: string[] = [];
-        console.log(this.document.firstChild);
 
         for (const node of this.document.childNodes) {
             if (!node.innerText) continue;
