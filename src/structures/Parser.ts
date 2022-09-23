@@ -105,6 +105,7 @@ export default class Parser {
 
     private getLanguage(): string | undefined {
         const htmlTag = this.document.getElementsByTagName("html")[0];
+        if (!htmlTag) return;
         return htmlTag.attributes.lang;
     }
 }

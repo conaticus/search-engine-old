@@ -21,6 +21,8 @@ server.get("/", (req, res) => {
 let scannedSites: { [key: string]: boolean | undefined } = {};
 
 const initialise = async () => {
+    // await db.keyword.deleteMany();
+    // await db.webPage.deleteMany();
     await getTopOneMill();
     await getTestSites();
     server.listen(process.env.PORT, () => console.log(`Listening at *:${process.env.PORT}`));
@@ -33,14 +35,15 @@ const indexPage = async (url: string, parser: Parser, topOneMill: string[]): Pro
 
     for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
+        if (scannedSites[url]) continue;
 
         try {
-            const response = await axios.get(url);
             scannedSites[url] = true;
+            const response = await axios.get(url);
             if (response.headers["content-type"].split(";")[0] !== "text/html") continue;
 
             const parser = new Parser(parse(response.data) as any);
-            await indexPage(url, parser, topOneMill);
+            indexPage(url, parser, topOneMill);
         } catch (e) {
             console.log(`FAILED TO ADD: ${url}`);
         }
@@ -73,24 +76,28 @@ const scrape = async () => {
         const site = "https://" + topOneMill[i];
         scannedSites[site] = true;
 
-        const response = await axios.get(site);
-        if (response.headers["content-type"].split(";")[0] !== "text/html") continue;
-
-        let manifest;
-
         try {
-            const manifestRes = await axios.get(`${site}/manifest.json`);
-            manifest = manifestRes.data;
-        } catch {}
+            const response = await axios.get(site);
+            if (response.headers["content-type"].split(";")[0] !== "text/html") continue;
 
-        const parser = new Parser(parse(response.data) as any, manifest);
-        try {
-            await indexPage(site, parser, topOneMill);
+            let manifest;
+
+            try {
+                const manifestRes = await axios.get(`${site}/manifest.json`);
+                manifest = manifestRes.data;
+            } catch {}
+
+            const parser = new Parser(parse(response.data) as any, manifest);
+            try {
+                await indexPage(site, parser, topOneMill);
+            } catch {
+                console.log("FAILED TO ADD:", site);
+            }
         } catch {
             console.log("FAILED TO ADD:", site);
         }
     }
 };
 
-scrape();
+// scrape();
 initialise();
