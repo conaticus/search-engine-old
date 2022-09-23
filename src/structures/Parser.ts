@@ -1,5 +1,6 @@
+import { KeywordPriority } from "@prisma/client";
 import { HTMLElement } from "node-html-parser";
-import { IKeyword, IMeta, KeywordPriority } from "../types";
+import { IKeyword, IMeta } from "../types";
 import { WORD_EXCEPTIONS } from "../util/consts";
 import { nounify } from "../util/strings";
 
@@ -12,6 +13,7 @@ export default class Parser {
     public getMeta(): IMeta {
         this.meta.title = this.manifest.name || this.getTitle();
         this.meta.description = this.manifest.description || this.getDescription();
+        this.meta.language = this.getLanguage();
 
         return this.meta;
     }
@@ -72,6 +74,11 @@ export default class Parser {
         return keywords;
     }
 
+    public getUrls = () => {
+        const aTags = this.document.getElementsByTagName("a");
+        return aTags.map((tag) => tag.attributes.href).filter((link) => link && link.startsWith("https://"));
+    };
+
     private extractWords(str: string = ""): string[] {
         str = str.toLowerCase().trim();
         str = str.replace(/[.,\/'#!$%^&*;:{}=-_`~()]/gm, ""); // ignore grammar (e.g "hi!" will be read as "hi")
@@ -94,5 +101,10 @@ export default class Parser {
         }
 
         return;
+    }
+
+    private getLanguage(): string | undefined {
+        const htmlTag = this.document.getElementsByTagName("html")[0];
+        return htmlTag.attributes.lang;
     }
 }

@@ -1,6 +1,6 @@
+import { KeywordPriority } from "@prisma/client";
 import Parser from "../structures/Parser";
-import { KeywordPriority } from "../types";
-import { getSites } from "./cache";
+import { getTestSites } from "./cache";
 import { nounify } from "./strings";
 
 /**
@@ -16,7 +16,7 @@ const search = async (query: string): Promise<any[]> => {
 
     const matches: any[] = [];
 
-    const sites = await getSites();
+    const sites = await getTestSites();
     const siteMap = sites.map(async ({ document, manifest }) => {
         const parser = new Parser(document as any, manifest);
 

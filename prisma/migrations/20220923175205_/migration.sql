@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "WebPage" ALTER COLUMN "title" DROP NOT NULL,
+ALTER COLUMN "description" DROP NOT NULL,
+ALTER COLUMN "language" DROP NOT NULL;

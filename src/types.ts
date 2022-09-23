@@ -1,8 +1,4 @@
-export enum KeywordPriority {
-    LOW,
-    MEDIUM,
-    HIGH,
-}
+import { Keyword } from "@prisma/client";
 
 export interface ISearchBody {
     query: string;
@@ -11,12 +7,7 @@ export interface ISearchBody {
 export interface IMeta {
     title?: string;
     description?: string;
-}
-
-export interface IKeyword {
-    priority: KeywordPriority;
-    keyword: string;
-    occurances: number;
+    language?: string;
 }
 
 export type WordAPIResponse = {
@@ -37,3 +28,5 @@ export type WordAPIResponse = {
         }[];
     }[];
 }[];
+
+export type IKeyword = Omit<Keyword, "id" | "webPage" | "webPageUrl">;
