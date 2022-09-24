@@ -76,7 +76,7 @@ export default class Parser {
 
     public getUrls = () => {
         const aTags = this.document.getElementsByTagName("a");
-        return aTags.map((tag) => tag.attributes.href).filter((link) => link && link.startsWith("https://"));
+        return aTags.map((tag) => tag.attributes.href).filter((link) => link && link.startsWith("https://") && !link.includes("?"));
     };
 
     private extractWords(str: string = ""): string[] {

@@ -21,8 +21,6 @@ server.get("/", (req, res) => {
 let scannedSites: { [key: string]: boolean | undefined } = {};
 
 const initialise = async () => {
-    // await db.keyword.deleteMany();
-    // await db.webPage.deleteMany();
     await getTopOneMill();
     await getTestSites();
     server.listen(process.env.PORT, () => console.log(`Listening at *:${process.env.PORT}`));
@@ -32,22 +30,6 @@ const indexPage = async (url: string, parser: Parser, topOneMill: string[]): Pro
     const { title, description, language } = parser.getMeta();
     const keywords = await parser.getKeywords();
     const urls = parser.getUrls().filter((u) => !scannedSites[u]);
-
-    for (let i = 0; i < urls.length; i++) {
-        const url = urls[i];
-        if (scannedSites[url]) continue;
-
-        try {
-            scannedSites[url] = true;
-            const response = await axios.get(url);
-            if (response.headers["content-type"].split(";")[0] !== "text/html") continue;
-
-            const parser = new Parser(parse(response.data) as any);
-            indexPage(url, parser, topOneMill);
-        } catch (e) {
-            console.log(`FAILED TO ADD: ${url}`);
-        }
-    }
 
     if (!title || keywords.length === 0) return;
     console.log("ADDING:", url);
@@ -64,6 +46,25 @@ const indexPage = async (url: string, parser: Parser, topOneMill: string[]): Pro
             },
         },
     });
+
+    for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        if (scannedSites[url]) continue;
+
+        try {
+            scannedSites[url] = true;
+            const response = await axios.get(url);
+            if (response.headers["content-type"].split(";")[0] !== "text/html") continue;
+
+            const parser = new Parser(parse(response.data) as any);
+            await new Promise(async (resolve) => {
+                await indexPage(url, parser, topOneMill);
+                resolve(undefined);
+            });
+        } catch (e) {
+            console.log(`FAILED TO ADD: ${url}`);
+        }
+    }
 };
 
 const scrape = async () => {
@@ -73,6 +74,8 @@ const scrape = async () => {
 
     const topOneMill = await getTopOneMill();
     for (let i = 0; i < topOneMill.length; i++) {
+        if (i === 200) break;
+
         const site = "https://" + topOneMill[i];
         scannedSites[site] = true;
 
@@ -89,7 +92,10 @@ const scrape = async () => {
 
             const parser = new Parser(parse(response.data) as any, manifest);
             try {
-                await indexPage(site, parser, topOneMill);
+                await new Promise(async (resolve) => {
+                    await indexPage(site, parser, topOneMill);
+                    resolve(undefined);
+                });
             } catch {
                 console.log("FAILED TO ADD:", site);
             }
@@ -99,5 +105,5 @@ const scrape = async () => {
     }
 };
 
-// scrape();
+scrape();
 initialise();

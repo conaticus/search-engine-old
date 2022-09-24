@@ -17,15 +17,14 @@ const search = async (query: string): Promise<any[]> => {
 
     const matches: any[] = [];
 
-    words.forEach(async (word) => {
+    const wordMap2 = words.map(async (word) => {
         const keywords = await db.keyword.findMany({
             where: {
-                keyword: word,
-                priority: KeywordPriority.HIGH,
+                keyword: word.toLowerCase(),
             },
         });
 
-        keywords.forEach(async (kw) => {
+        const kwMap = keywords.map(async (kw) => {
             const site = await db.webPage.findFirst({
                 where: {
                     url: kw.webPageUrl,
@@ -36,13 +35,18 @@ const search = async (query: string): Promise<any[]> => {
                 meta: {
                     title: site?.title,
                     description: site?.description,
-                    score: 0,
                 },
+                score: 0,
+                url: site?.url,
             };
 
             matches.push(siteMatch);
         });
+
+        await Promise.all(kwMap);
     });
+
+    await Promise.all(wordMap2);
 
     // const sites = await getTestSites();
     // const siteMap = sites.map(async ({ document, manifest }) => {

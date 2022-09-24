@@ -67,10 +67,14 @@
                     const container = document.createElement("div");
                     const titleContainer = document.createElement("a");
                     const title = document.createElement("h1");
+                    const url = document.createElement("a");
                     const description = document.createElement("h3");
                     const score = document.createElement("p");
 
+                    url.href = result.url;
+
                     title.innerText = result.meta.title;
+                    url.innerText = result.url;
                     description.innerText = result.meta.description || "";
                     score.innerText = result.score;
 
@@ -78,6 +82,7 @@
                     titleContainer.href = "/"; // placeholder
 
                     container.appendChild(titleContainer);
+                    container.appendChild(url);
                     container.appendChild(description);
                     container.appendChild(score);
 
