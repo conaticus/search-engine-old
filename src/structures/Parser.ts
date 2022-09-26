@@ -74,11 +74,6 @@ export default class Parser {
         return keywords;
     }
 
-    public getUrls = () => {
-        const aTags = this.document.getElementsByTagName("a");
-        return aTags.map((tag) => tag.attributes.href).filter((link) => link && link.startsWith("https://") && !link.includes("?"));
-    };
-
     private extractWords(str: string = ""): string[] {
         str = str.toLowerCase().trim();
         str = str.replace(/[.,\/'#!$%^&*;:{}=-_`~()]/gm, ""); // ignore grammar (e.g "hi!" will be read as "hi")

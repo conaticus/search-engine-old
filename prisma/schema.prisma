@@ -24,6 +24,7 @@ model WebPage {
   description String?
   language    String?
   keywords    Keyword[]
+  rank        Int
 }
 
 model Keyword {
