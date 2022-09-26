@@ -35,3 +35,8 @@ model Keyword {
   keyword    String
   occurances Int
 }
+
+model Plural {
+  plural    String @unique
+  pluralFor String
+}
