@@ -56,11 +56,7 @@ const scrape = async () => {
 
         try {
             await indexPage(url, i);
-            console.log(`${url} works`);
         } catch (err: any) {
-            if (url.includes("opensea")) {
-                console.log(err);
-            }
             console.log("FAILED TO ADD:", url);
         } finally {
             stream.read(CHUNK_SIZE);
