@@ -3,15 +3,15 @@ import db from "./db";
 import axios from "axios";
 import parse from "node-html-parser";
 import fsSync from "fs";
-const fakeUserAgent = require("fake-useragent");
+import * as URL from "url";
 
 const getPage = async (url: string): Promise<Parser | undefined> => {
-    const response = await axios.get(url, { headers: { "User-Agent": fakeUserAgent() } });
+    const response = await axios.get(url);
     if (response.headers["content-type"].split(";")[0] !== "text/html") return;
 
     let manifest;
     try {
-        const manifestRes = await axios.get(`${url}/manifest.json`, { headers: { "User-Agent": fakeUserAgent() } });
+        const manifestRes = await axios.get(`${url}manifest.json`);
         manifest = manifestRes.data;
     } catch {}
 
@@ -30,7 +30,7 @@ const indexPage = async (url: string, rank: number): Promise<void> => {
     if (!title || keywords.length === 0) return;
     await db.webPage.create({
         data: {
-            url,
+            url: url.toString(),
             title,
             description,
             language,
@@ -44,48 +44,36 @@ const indexPage = async (url: string, rank: number): Promise<void> => {
     });
 };
 
-let iteration = 1;
-
 const CHUNK_SIZE = 500;
 
 const scrape = async () => {
-    if (iteration * CHUNK_SIZE >= 12316 * 1000) return;
-    console.log("start:", iteration * CHUNK_SIZE - CHUNK_SIZE + 1);
-    console.log("end:", iteration * CHUNK_SIZE);
+    const stream = fsSync.createReadStream("top-1m.txt");
+    let i = 0;
 
-    const stream = fsSync.createReadStream("top-1m.txt", {
-        start: iteration * CHUNK_SIZE - CHUNK_SIZE,
-        end: iteration * CHUNK_SIZE,
+    stream.on("line", async (line: string) => {
+        if (line.length === 0) return;
+        const url = new URL.URL(`https://${line}`).toString();
+
+        try {
+            await indexPage(url, i);
+            console.log(`${url} works`);
+        } catch (err: any) {
+            if (url.includes("opensea")) {
+                console.log(err);
+            }
+            console.log("FAILED TO ADD:", url);
+        } finally {
+            stream.read(CHUNK_SIZE);
+            i += 1;
+        }
     });
 
-    await new Promise<void>((resolve) => {
-        let fullString = "";
-
-        stream.on("data", (chunk) => {
-            fullString += chunk;
-        });
-
-        stream.on("end", async () => {
-            const lines = fullString.split("\n");
-            lines.pop();
-            const downloadMap = lines.map(async (line, idx) => {
-                line.trim();
-                const url = `https://${line}`;
-
-                try {
-                    await indexPage(url, idx + 1);
-                } catch (err: any) {
-                    console.log("FAILED TO ADD:", url);
-                }
-            });
-
-            await Promise.all(downloadMap);
-            resolve();
-        });
+    stream.on("data", (chunk) => {
+        const urls = chunk.toString().split("\n");
+        urls.forEach((url) => stream.emit("line", url));
     });
 
-    iteration++;
-    scrape();
+    stream.read(CHUNK_SIZE);
 };
 
 export default scrape;

@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import router from "./routes/router";
 import { getTestSites, getTopOneMill } from "./util/cache";
+import db from "./util/db";
 import scrape from "./util/scraping";
 
 require("dotenv").config();
